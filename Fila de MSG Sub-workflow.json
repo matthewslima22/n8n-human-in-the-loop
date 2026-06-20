@@ -1,0 +1,380 @@
+{
+  "name": "Fila de MSG Sub-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Fila de mensagens\n```\nBuffer de mensagens, agrupando mensagens, aguardando X segundos, antes de seguir o fluxo\n```",
+        "height": 688,
+        "width": 1344,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -96
+      ],
+      "id": "e5799b8e-3ee1-4bfc-b85b-93ac799ef9b2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "payload",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -592,
+        208
+      ],
+      "id": "0c6992bb-0e03-49c1-9fb3-d314076f1dd1",
+      "name": "Payload"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.payload.from }}_messages",
+        "messageData": "={{ JSON.stringify($json.payload.msg) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        208
+      ],
+      "id": "030a74a8-070d-498c-bb89-9ec049b4d894",
+      "name": "AddToQueue",
+      "credentials": {
+        "redis": {
+          "id": "eeUt32cysiBOdWbD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "messages",
+        "key": "={{ $('Payload').item.json.payload.from }}_messages",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        208
+      ],
+      "id": "ab75ffa2-7cd8-4ec1-b9be-5a3b01af3c5f",
+      "name": "GetMessages",
+      "credentials": {
+        "redis": {
+          "id": "eeUt32cysiBOdWbD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.parse($json.messages.first()).date }}",
+                    "rightValue": "={{ $('Payload').item.json.payload.msg.date }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    },
+                    "id": "7dfa5e93-91a4-430b-bf49-b70720c048cc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Do nothing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "89d902b0-24fc-4ba1-bbff-f2396a89db46",
+                    "leftValue": "={{ JSON.parse($json.messages.last()).date }}",
+                    "rightValue": "={{ $now.minus(15, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Continue"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Wait"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        48,
+        208
+      ],
+      "id": "962540e4-d5fa-498c-baa3-42f9b107794c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        400
+      ],
+      "id": "15c3008f-86f4-42ef-ace1-1457bdba6bf1",
+      "name": "Wait",
+      "webhookId": "e0f34c17-7e6e-4d18-9888-689cd3e14f54"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Payload').item.json.payload.from }}_messages"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        320,
+        224
+      ],
+      "id": "23123138-de63-4576-8472-18f6332dba68",
+      "name": "EraseQueue",
+      "credentials": {
+        "redis": {
+          "id": "eeUt32cysiBOdWbD",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "41548441-b9aa-491a-9921-c184a13631c6",
+              "name": "message.text",
+              "value": "={{ $json.messages.map( item => JSON.parse(item).content).join(\" \") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        528,
+        224
+      ],
+      "id": "64155f8f-a2e7-4d14-a314-4fecd9b01eca",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aac709aa-0864-44f9-9798-67ab28884226",
+              "leftValue": "={{ $json.messages }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "72f72124-83e3-4618-b553-9c70ba4f037e",
+              "leftValue": "={{ $json.messages }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "array",
+                "operation": "lengthLte",
+                "rightType": "number"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        64
+      ],
+      "id": "a3204f48-6028-4f74-a92f-7f61bc3e78bb",
+      "name": "KeepWaiting"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=8272205355_messages"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        432
+      ],
+      "id": "c2fb8f49-002d-439b-a179-7674f0c5ff9e",
+      "name": "RemoveQueue",
+      "credentials": {
+        "redis": {
+          "id": "eeUt32cysiBOdWbD",
+          "name": "Redis account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Payload": [
+      {
+        "json": {
+          "payload": {
+            "from": 8272205355,
+            "msg": {
+              "date": "2025-12-04T19:41:44.800-03:00",
+              "content": "oi"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Payload": {
+      "main": [
+        [
+          {
+            "node": "AddToQueue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddToQueue": {
+      "main": [
+        [
+          {
+            "node": "GetMessages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetMessages": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "KeepWaiting",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "EraseQueue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "GetMessages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EraseQueue": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "edf758c8-0644-4765-aa2a-af05b481b7c6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3d396023e636143d45659add657eb15f47ad816d719ffcfd342b88bae54f3c1a"
+  },
+  "id": "epWUs7BQuj0OPAsL",
+  "tags": []
+}

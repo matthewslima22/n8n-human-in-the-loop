@@ -1,0 +1,411 @@
+{
+  "name": "Human In the Loop",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -944,
+        -80
+      ],
+      "id": "952dbf99-270b-4c2d-8216-ef6ab1fb9f50",
+      "name": "Telegram Trigger",
+      "webhookId": "6d008304-cb3b-498e-960c-74368ee34c6e",
+      "credentials": {
+        "telegramApi": {
+          "id": "qrjvtsLP7AE1Wg5G",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Gere um conteúdo para o instagram no estilo e tom de voz de oisalvo.com.br.\n\nTEMA PRINCIPAL: {{ $json.message.text }}\n\nOBJETIVO: [INFIRA O OBJETIVO]\nFORMATO: [INFIRA O FORMATO]\nREGRAS DE FORMATAÇÃO E TOM (CRÍTICAS):\n\n- EVITE Utilizar emojis\n- Use frases de impacto no início para prender a atenção (o famoso \"Hook\").\n- EVITE ADICIONAR HASHTAGS\n- MAXIMO 400 caracteres\n",
+        "options": {
+          "systemMessage": "=SYSTEM PROMPT\n\nVocê é o Social Media Oficial do Salvo.\n\nSua única função é criar conteúdos estratégicos para as redes sociais do Salvo. Nunca crie conteúdos para outras empresas, marcas ou projetos.\n\nSobre o Salvo\n\nO Salvo é um assistente financeiro inteligente que ajuda pessoas a organizar gastos, acompanhar receitas, visualizar relatórios financeiros, controlar cartões, receber lembretes de contas, monitorar assinaturas e desenvolver hábitos financeiros mais saudáveis através do WhatsApp.\n\nO foco do Salvo é simplificar a vida financeira de forma prática, acessível e humana.\n\nPúblico-alvo\nPessoas que não controlam bem suas finanças.\nUsuários que esquecem contas e compromissos financeiros.\nPessoas que desejam economizar mais.\nProfissionais autônomos e trabalhadores CLT.\nUsuários que querem praticidade sem planilhas complexas.\nPessoas interessadas em educação financeira.\nObjetivos dos conteúdos\n\nPriorize:\n\nGeração de autoridade.\nEducação financeira.\nEngajamento.\nConversão para assinatura do Salvo.\nDemonstração de funcionalidades.\nRetenção de clientes.\nTom de voz\n\nUtilize sempre:\n\nLinguagem natural.\nLinguagem humana.\nLinguagem simples.\nTom inteligente.\nTom confiável.\nTom amigável.\nTom objetivo.\n\nEvite:\n\nLinguagem corporativa excessiva.\nJargões de marketing.\nFrases genéricas motivacionais.\nEmojis em excesso.\n\nUtilize no máximo 1 emoji quando fizer sentido.\n\nRegras obrigatórias\nNunca utilize travessão (—).\nNunca invente funcionalidades que não existam.\nNunca mencione concorrentes.\nNunca faça promessas financeiras.\nNunca prometa enriquecimento.\nSempre destaque benefícios práticos.\nSempre escreva em português do Brasil.\nPriorize exemplos reais do cotidiano.\nEstrutura de criação\n\nAntes de responder, identifique o tipo de conteúdo solicitado.\n\nOs formatos possíveis são:\n\nPost para Instagram\nCarrossel\nStory\nReels\nThread para X\nPost para LinkedIn\nLegenda\nCalendário editorial\nCampanha\nCTA\nRoteiro de vídeo curto\nFrameworks\n\nQuando apropriado utilize:\n\nAIDA\nPAS\nStorytelling\nBefore After Bridge\nProblem Solution\nHook + Valor + CTA\nGeração de conteúdo\n\nAo criar conteúdos:\n\nGere um título forte.\nCrie um gancho inicial.\nDesenvolva o conteúdo.\nFinalize com CTA.\nExplique rapidamente o objetivo estratégico da publicação.\nExemplos de CTA\nConheça o Salvo.\nOrganize suas finanças sem complicação.\nPare de esquecer suas contas.\nVeja para onde seu dinheiro está indo.\nComece a ter mais controle financeiro hoje.\nQuando receber uma solicitação\n\nEntenda o objetivo do conteúdo e entregue:\n\nConteúdo completo.\nFormatação pronta para publicação.\nCTA final.\nSugestão de imagem ou criativo quando relevante.\n\nNunca responda como um assistente genérico. Responda sempre como o especialista de Social Media do Salvo.\n\n## TOOL\nTavily Search para pesquisar insumo sobre o tópico desejado\n\n## IMPORTANTE\n- SEMPRE chame a tool Tavily Search para obter insumo\n- NUNCA responda sem antes obter insumo do Tavily Search"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -496,
+        -80
+      ],
+      "id": "4bb5bfa2-ffb5-4f28-83e1-b490e26d8fef",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        144
+      ],
+      "id": "18376e9f-5700-4c86-8a25-932df50c6a6e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4sA0ScPNRHeRWxXz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the web. Requires `query` param",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `The search query`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        -352,
+        144
+      ],
+      "id": "8037de1a-a674-40a4-b755-7ea3a1958687",
+      "name": "Tavily Search",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "buhriQhfomCNPkim",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8ffa4fd4-95a5-4ccb-a0be-5f3db75fff38",
+              "name": "post",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        -80
+      ],
+      "id": "d8728a0b-3d04-4c55-80a8-aaa6b3e074f1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "message": "=Aprovado?\n\n{{ $json.post }}",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -80
+      ],
+      "id": "09cbc517-d99d-48b1-bd61-580edcc3f3a5",
+      "name": "Send a text message",
+      "webhookId": "17327850-1374-4e3c-9dca-bfedd7277687",
+      "credentials": {
+        "telegramApi": {
+          "id": "qrjvtsLP7AE1Wg5G",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.data.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "approved",
+              "description": "O post foi revisado e aprovado, aceito pelo usuário. O usuário indicou que gostou e não precisa de nenhuma alteração."
+            },
+            {
+              "category": "declined",
+              "description": "O usuário solicitou modificações, pediu para remover partes ou adicionar partes, reescrever, etc. Qualquer sugestão do usuário sobre editar, modificar, alterar, será entendido como declined"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        -80
+      ],
+      "id": "f8eecb32-0455-4e68-90aa-bed4568ce618",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um escritor expert em twitter e especialista em revisão. Seu trabalho é pegar o post para ser revisado e revisar baseado no feedback do humano.\n\n<post-to-review>\n{{ $node['Edit Fields'].json.post }}\n</post-to-review>\n\n<human-feedback>\n{{ $json.data.text }}\n</human-feedback>\n\nRegras\n- Utilize sua tool de pesquisa APENAS se o humano solicitar\n\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        640,
+        16
+      ],
+      "id": "d7610af6-3044-4c4e-ad50-aa18f8862a87",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "8n4YnTdSl10jDRKi",
+          "mode": "list",
+          "cachedResultName": "posts-salvo",
+          "cachedResultUrl": "/projects/ZJHeG0mIGPLtBiSW/datatables/8n4YnTdSl10jDRKi"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "post"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -144
+      ],
+      "id": "ee7e9ade-47d8-4abc-a686-9431c2abc006",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "content": "```\nHuman in the Loop: Precisa de intervenção humana? Então, pausa o fluxo até que haja uma resposta\n```",
+        "height": 576,
+        "width": 1920,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        -288
+      ],
+      "id": "468e2eb2-b4cd-4bbb-8fa9-eac7f2d9ff06",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "epWUs7BQuj0OPAsL",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/epWUs7BQuj0OPAsL",
+          "cachedResultName": "Fila de MSG Sub-workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ \n  {\n    from: $json.message.from.id,\n    msg: {\n      date: $now.toISO(),\n      content: $json.message.text\n    }\n  }\n}}"
+          },
+          "matchingColumns": [
+            "payload"
+          ],
+          "schema": [
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -704,
+        -80
+      ],
+      "id": "83e6c319-1e82-4bec-a618-9003a06144f2",
+      "name": "Call 'Fila de MSG Sub-workflow'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Call 'Fila de MSG Sub-workflow'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Fila de MSG Sub-workflow'": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "03404964-b91b-486a-970d-50d014c54b7d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3d396023e636143d45659add657eb15f47ad816d719ffcfd342b88bae54f3c1a"
+  },
+  "id": "Zsehs4GN4TEyHEzj",
+  "tags": []
+}
